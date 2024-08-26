@@ -38,10 +38,12 @@ THIRD_PARTY_APPS = [
 ]
 
 FIRST_PARTY_APPS = [
-
+    'core.apps.users',
+    'core.apps.proxy'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -89,6 +91,8 @@ DATABASES = {
     },
 }
 
+# https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
+AUTH_USER_MODEL = "users.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
