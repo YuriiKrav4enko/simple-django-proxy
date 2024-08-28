@@ -8,6 +8,7 @@ services:
       - 8000:8000
     command: wait-for-it db:5432 -- /bin/sh -c 
              "./manage.py collectstatic --no-input &&
+             ./manage.py migrate &&
              uwsgi --master --http :8000 --module core.project.wsgi"
     env_file:
       - ../.env

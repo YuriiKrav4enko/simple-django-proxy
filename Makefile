@@ -35,11 +35,18 @@ backend-logs:
 .PHONY: backend-stop
 backend-stop:
 	docker compose -f ${BACKEND_DC_FILE} -f ${DB_DC_FILE} down
-
 .PHONY: migrate
 migrate:
-	docker exec -it ${BACKEND_CONTAINER} ./manage.py migrate
+	${EXEC} ${APP_CONTAINER} ${MANAGE_PY} migrate
+
+.PHONY: migrations
+migrations:
+	${EXEC} ${APP_CONTAINER} ${MANAGE_PY} makemigrations
 
 .PHONY: superuser
 superuser:
-	docker exec -it ${BACKEND_CONTAINER} ./manage.py createsuperuser
+	${EXEC} ${APP_CONTAINER} ${MANAGE_PY} createsuperuser
+
+.PHONY: collectstatic
+collectstatic:
+	${EXEC} ${APP_CONTAINER} ${MANAGE_PY} collectstatic
