@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 
 from core.apps.proxy.models import UserSite
-from core.apps.proxy.services.content_modifier import ContentModifier
+from core.apps.proxy.services.content_modifier import ContentModifierService
 from core.apps.proxy.services.proxy_service import ProxyService
 from core.apps.proxy.services.statistics_service import StatisticsService
 
@@ -54,7 +54,7 @@ class ProxyView(View):
             response_size=response_size
         )
 
-        content_modifier = ContentModifier(request=request, usersite=user_site)
+        content_modifier = ContentModifierService(request=request, usersite=user_site)
         # Перевірка чи відповідь є JSON
         # if proxied_response.headers['Content-Type'] == 'application/json':
         #     json_data = proxied_response.json()
