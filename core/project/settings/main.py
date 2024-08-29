@@ -39,7 +39,8 @@ THIRD_PARTY_APPS = [
 
 FIRST_PARTY_APPS = [
     'core.apps.users',
-    'core.apps.proxy'
+    'core.apps.proxy',
+    'core.apps.metrics'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS

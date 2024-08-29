@@ -1,4 +1,5 @@
-from django.http import HttpRequest, HttpResponse
+from django.core.exceptions import PermissionDenied
+from django.http import HttpRequest, HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
 
@@ -13,12 +14,17 @@ class ProxyView(View):
         super().__init__(**kwargs)
         self.proxy_service = ProxyService()
         self.statistics_service = StatisticsService()
-        self.content_modifier = ContentModifier()
+
+    def check_auth(self, request: HttpRequest) -> None:
+        if not request.user.is_authenticated:
+            raise PermissionDenied("Authentication is required!")
 
     def get(self, request: HttpRequest, user_site_slug: str, route: str, *args, **kwargs):
+        self.check_auth(request=request)
         return self.handle_request(request, user_site_slug, route)
 
     def post(self, request: HttpRequest, user_site_slug: str, route: str, *args, **kwargs):
+        self.check_auth(request=request)
         return self.handle_request(request, user_site_slug, route)
 
     def handle_request(self, request: HttpRequest, user_site_slug: str, route: str, *args, **kwargs):
@@ -48,10 +54,23 @@ class ProxyView(View):
             response_size=response_size
         )
 
+        content_modifier = ContentModifier(request=request, usersite=user_site)
+        # Перевірка чи відповідь є JSON
+        # if proxied_response.headers['Content-Type'] == 'application/json':
+        #     json_data = proxied_response.json()
+        #     modified_json = content_modifier.modify_json_links(json_data) # TODO
+        #     return JsonResponse(modified_json)
+        
+        # Обробка відповіді, якщо це медіа-файл
+        if proxied_response.headers.get('Content-Type', '').startswith('image/'):
+            # Створюємо StreamingHttpResponse для передачі медіа-файлу
+            response = StreamingHttpResponse(
+                proxied_response.iter_content(chunk_size=4096),
+                content_type=proxied_response.headers['Content-Type']
+            )
+            response['Content-Length'] = proxied_response.headers.get('Content-Length', '').encode()
+            return response
+        
         # Модифікуємо контент перед відправкою клієнту
-        modified_content = self.content_modifier.modify_links(
-            request=request,
-            usersite=user_site,
-            content=proxied_response.text
-        )
+        modified_content = content_modifier.modify_links(content=proxied_response.text)
         return HttpResponse(modified_content, content_type=proxied_response.headers['Content-Type'])
