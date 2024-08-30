@@ -54,7 +54,11 @@ class ProxyView(View):
             response_size=response_size
         )
 
-        content_modifier = ContentModifierService(request=request, usersite=user_site)
+        content_modifier = ContentModifierService(
+            new_schema=request.scheme,
+            new_netloc=request.get_host(),
+            usersite=user_site
+        )
         # Перевірка чи відповідь є JSON
         # if proxied_response.headers['Content-Type'] == 'application/json':
         #     json_data = proxied_response.json()
